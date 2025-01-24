@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Bienvenida</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        body {
+            background-color: lightgreen;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 5em;
+            font-family: 'Pacifico', cursive;
+        }
+        .form-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .form-container form {
+            display: inline-block;
+            padding: 30px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+        }
+        .form-container p {
+            margin: 0px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+        .form-container input {
+            width: 400px;
+            padding: 15px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            font-size: 1.5em;
+            text-align: center;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        .form-container input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+        .form-container button {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .form-container button:hover {
+            background-color: #367c39;
+        }
+        .socio-info {
+            margin-top: 30px;
+            text-align: center;
+            padding: 30px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+            width: 500px;
+            font-size: 1.3em;
+        }
+          .error-message {
+            margin-top: 20px;
+            text-align: center;
+            color: red;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+    </style>
+    {% if refrescar_pagina %}
+    <meta http-equiv="refresh" content="5;url=/bienvenida">
+    {% endif %}
+</head>
+<body>
+    <h1>Bienvenidos</h1>
+
+    {% if mensaje_clases %}
+        <p>{{ mensaje_clases }}</p>
+    {% endif %}
+
+      {% if mensaje_error %}
+        <p class="error-message">{{ mensaje_error }}</p>
+      {% endif %}
+
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.dni }}
+            <button type="submit">Buscar Socio</button>
+        </form>
+    </div>
+
+    {% if socio_encontrado %}
+        <div class="socio-info">
+            <p><strong>Nombre:</strong> {{ socio_encontrado.nombre }}</p>
+            <p><strong>Tipo de Mensualidad:</strong> {{ socio_encontrado.tipo_mensualidad.tipo }}</p>
+            {% if socio_encontrado.tipo_mensualidad.tipo == "Pase Libre" %}
+                <p><strong>Fecha de Vencimiento:</strong> {{ socio_encontrado.fecha_vencimiento }}</p>
+            {% elif socio_encontrado.tipo_mensualidad.tipo == "12 clases" %}
+                <p><strong>Clases Restantes:</strong> {{ socio_encontrado.clases_restantes }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>
