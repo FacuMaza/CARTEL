@@ -1,0 +1,10 @@
+# Ignorar archivos de base de datos
+*.db
+*.sqlite
+*.sqlite3
+data/
+club/GYM/box/box.sqlite3"club/GYM/box/box.sqlite3" 
+"../../../club/GYM/box/box.sqlite3" 
+../../../club/GYM/box/box.sqlite3
+../../../club/GYM/box
+"C:\Users\facu_\OneDrive\Escritorio\club\GYM\box\box.sqlite3"

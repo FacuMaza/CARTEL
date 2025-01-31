@@ -1,0 +1,11 @@
+</head>
+<body>
+    <h1>Socios</h1>
+    <ul>
+        {% for socio in socios %}
+            <li>{{ socio.nombre }} {{ socio.apellido }} DNI: {{socio.dni}} Gimnasio:{{socio.gimnasio}} Usuario: {{socio.usuario}}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+```
