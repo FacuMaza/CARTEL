@@ -120,101 +120,96 @@ def bienvenida(request):
     mensaje_error = ""
     refrescar_pagina = False
     datos_socio_mostrar = {}
-    alerta_clases = ""  # Mensaje para la alerta de clases restantes
+    alerta_clases = ""
 
     if request.method == "POST":
         form = DNISearchForm(request.POST)
-        print(f"Formulario valido?: {form.is_valid()}")
         if form.is_valid():
             dni = form.cleaned_data["dni"]
-            print(f"DNI Ingresado: {dni}")
-            refrescar_pagina = (
-                True  # Activar la recarga aquí, siempre que el form sea valido
-            )
-            datos_gym = obtener_datos_gym()
+            refrescar_pagina = True
 
-            if datos_gym:
-                for socio in datos_gym:
-                    print(
-                        f"Comparando DNI: socio['dni']={socio['dni']}, dni={dni}"
-                    )  # Imprime los valores a comparar
-                    if socio["dni"] == dni:
-                        socio_encontrado = socio
-                        mensaje = (
-                            f"Bienvenido, {socio_encontrado['nombre']} {socio_encontrado['apellido']}!"  # Cambiado aquí
-                        )
+            try:
+                API_URL = f"{settings.API_BASE_URL}/api/socios/"
+                logging.debug(f"Haciendo petición GET a: {API_URL}")
+                response = requests.get(API_URL)
+                response.raise_for_status()
+                logging.debug(f"Respuesta de la API: {response.status_code}, {response.text}")
 
-                        # Lógica de descuento de clases
-                        if socio_encontrado.get("tipo_mensualidad"):
-                            if socio_encontrado["tipo_mensualidad"].get("tipo") == "12 clases":
-                                if socio_encontrado["clases_restantes"] > 0:
-                                    # Verificar si quedan 2 clases
-                                    if socio_encontrado["clases_restantes"] == 2:
+                datos_gym = response.json()
+
+                if datos_gym:
+                    for socio in datos_gym:
+                        if socio.get('dni') == dni:
+                            socio_encontrado = socio
+                            nombre = socio_encontrado.get('nombre', 'Desconocido')
+                            apellido = socio_encontrado.get('apellido', 'Desconocido')
+                            mensaje = f"Bienvenido, {nombre} {apellido}!"
+
+                            # Lógica de descuento de clases
+                            tipo_mensualidad = socio_encontrado.get('tipo_mensualidad', {})
+                            if tipo_mensualidad.get('tipo') == "12 clases":
+                                clases_restantes = socio_encontrado.get('clases_restantes', 0)
+                                if clases_restantes > 0:
+                                    if clases_restantes == 2:
                                         alerta_clases = "¡Te quedan 2 clases!"
 
-                                    # Descontar una clase
-                                    nuevas_clases = (
-                                        socio_encontrado["clases_restantes"] - 1
-                                    )
-                                    # Actualizar clases en la API
-                                    if actualizar_clases_socio(
-                                        socio_encontrado["id"], nuevas_clases
-                                    ):
-                                        mensaje_clases = (
-                                            f" Te quedan {nuevas_clases} clases."
-                                        )
-                                        socio_encontrado["clases_restantes"] = (
-                                            nuevas_clases
-                                        )  # Actualizamos el valor para la vista
-                                        print(
-                                            "Clases actualizadas correctamente, y variable refrescar_pagina seteada a True"
-                                        )
+                                    nuevas_clases = clases_restantes - 1
+                                    socio_id = socio_encontrado.get('id')
+                                    if socio_id:
+                                        actualizar_url = f"{settings.API_BASE_URL}/api/socios/{socio_id}/"
+                                        data = {"clases_restantes": nuevas_clases}
+                                        response = requests.patch(actualizar_url, json=data)
+                                        response.raise_for_status()
+                                        mensaje_clases = f" Te quedan {nuevas_clases} clases."
+                                        socio_encontrado["clases_restantes"] = nuevas_clases
                                     else:
-                                        mensaje_error = "Error al actualizar clases"
+                                        mensaje_error = "Error: ID de socio no encontrado"
                                 else:
                                     mensaje_clases = " No te quedan clases disponibles, renueva tu mensualidad."
 
-                        datos_socio_mostrar = {
-                            "nombre": socio_encontrado["nombre"],
-                            "apellido": socio_encontrado["apellido"],
-                            "tipo_mensualidad": socio_encontrado.get(
-                                "tipo_mensualidad", {}
-                            ).get("tipo", "Sin mensualidad"),
-                            "clases_restantes": socio_encontrado.get(
-                                "clases_restantes", "N/A"
-                            ),
-                            "fecha_vencimiento": socio_encontrado.get(
-                                "fecha_vencimiento", "N/A"
-                            ),
-                        }
+                            datos_socio_mostrar = {
+                                "nombre": nombre,
+                                "apellido": apellido,
+                                "tipo_mensualidad": tipo_mensualidad.get('tipo', 'Sin mensualidad'),
+                                "clases_restantes": clases_restantes,
+                                "fecha_vencimiento": socio_encontrado.get('fecha_vencimiento', 'N/A'),
+                            }
 
-                        # Registrar el ingreso en el sistema gym
-                        if registrar_ingreso_gym(
-                            dni,
-                            socio_encontrado["clases_restantes"],
-                            socio_encontrado["nombre"],
-                            socio_encontrado["apellido"],
-                        ):  # Pasar el DNI del socio y clases restantes
-                            print("Ingreso registrado correctamente en el sistema gym.")
-                        else:
-                            mensaje_error = "Error al registrar el ingreso en el sistema gym."
-                        break
+                            # Registrar el ingreso en el sistema gym
+                            registrar_ingreso_gym(
+                                dni,
+                                clases_restantes,
+                                nombre,
+                                apellido,
+                            )
+                            break
+                    else:
+                        mensaje_error = "Socio no encontrado o datos incorrectos."
+                        mensaje = ""
                 else:
-                    mensaje_error = "Socio no encontrado o datos incorrectos."
+                    mensaje_error = "Error al obtener datos desde gym"
                     mensaje = ""
-            else:
-                mensaje_error = "Error al obtener datos desde gym"
+
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Error al obtener datos de la API: {e}")
+                mensaje_error = f"Error al conectar con la API: {e}"
                 mensaje = ""
+            except json.JSONDecodeError as e:
+                logging.error(f"Error al decodificar JSON: {e}")
+                mensaje_error = f"Error al decodificar los datos de la API."
+                mensaje = ""
+            except Exception as e:
+                logging.error(f"Error inesperado: {e}")
+                mensaje_error = f"Error inesperado: {e}"
+                mensaje = ""
+
         else:
-            refrescar_pagina = (
-                False  # Para que no se recargue si el form no es valido
-            )
+            refrescar_pagina = False
 
     else:
         form = DNISearchForm()
-        refrescar_pagina = False  # Para que no se recargue al inicializar la pagina
+        refrescar_pagina = False
 
-    print(f"refrescar_pagina={refrescar_pagina}")
     return render(
         request,
         "bienvenida.html",
@@ -229,6 +224,3 @@ def bienvenida(request):
             "alerta_clases": alerta_clases,
         },
     )
-
-from django.conf import settings
-API_URL = f"{settings.API_BASE_URL}/api/socios/"
