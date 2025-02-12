@@ -229,3 +229,6 @@ def bienvenida(request):
             "alerta_clases": alerta_clases,
         },
     )
+
+from django.conf import settings
+API_URL = f"{settings.API_BASE_URL}/api/socios/"
