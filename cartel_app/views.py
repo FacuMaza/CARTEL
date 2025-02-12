@@ -30,7 +30,10 @@ def parse_api_response(response_text):
 
 
 def obtener_datos_gym():
+    API_URL = "/api/socios/"  # URL ahora es relativa y usa /api/
+
     API_URL = "http://198.199.121.214/api/socios/"  # URL completa con la IP del servidor cartel
+
 
     try:
         logging.debug(f"Haciendo petición GET a: {API_URL}")
@@ -61,7 +64,11 @@ def obtener_datos_gym():
 
 def actualizar_clases_socio(socio_id, nuevas_clases):
     """Función para actualizar las clases restantes de un socio en la API."""
+
+    API_URL = f"/api/socios/{socio_id}/"  # URL ahora es relativa y usa /api/
+
     API_URL = f"http://198.199.121.214/api/socios/{socio_id}/"  # URL completa con la IP del servidor cartel
+
 
     try:
         data = {"clases_restantes": nuevas_clases}
@@ -79,6 +86,9 @@ def actualizar_clases_socio(socio_id, nuevas_clases):
 
 def registrar_ingreso_gym(dni_socio, clases_restantes, nombre_socio, apellido_socio):
     """Función para registrar el ingreso de un socio en la base de datos del sistema gym."""
+
+    API_URL = "/api/registrar-ingreso/"  # URL ahora es relativa y usa /api/
+
     API_URL = f"http://198.199.121.214/api/registrar-ingreso/"  # URL completa con la IP del servidor cartel
 
     try:
