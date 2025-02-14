@@ -1,108 +1,45 @@
-import requests
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import render
 from .forms import DNISearchForm
-import logging
+from django.conf import settings
+import requests
 import json
-from django.conf import settings  # Importa settings para obtener DEBUG
-from datetime import datetime
+import logging
+from django.views.decorators.csrf import csrf_protect
+import datetime
 
-logging.basicConfig(level=logging.DEBUG)
-
-
-def parse_api_response(response_text):
+def obtener_datos_gym(api_base_url):
     try:
-        # Remove any leading or trailing whitespace
-        response_text = response_text.strip()
-        # Wrap the response in square brackets to make it a valid JSON array (si es necesario)
-        if not response_text.startswith('['):
-            response_text = f"[{response_text}]"
-        # Replace instances of }{ with }, {
-        response_text = response_text.replace("}{", "}, {")
-        # Parse the fixed string
-        data = json.loads(response_text)
-        return data
-    except json.JSONDecodeError as e:
-        logging.error(f"JSON Decode Error: {e}")
-        return None
-    except Exception as e:
-        logging.error(f"Error: {e}")
-        return None
-
-
-def obtener_datos_gym(api_base_url):  # Pasa api_base_url como argumento
-    API_URL = f"{api_base_url}/api/socios/"
-
-    try:
-        logging.debug(f"Haciendo petición GET a: {API_URL}")
-        response = requests.get(API_URL)
-        response.raise_for_status()
-        logging.debug(
-            f"Respuesta de la API: {response.status_code}, {response.text}"
-        )
-
-        try:
-            # Try parsing as JSON
-            data = response.json()
-            return data
-        except json.JSONDecodeError as e:
-            # If parsing failed, try to fix the JSON
-            logging.warning(f"Respuesta JSON inválida. Intentando reparar... {e}")
-            data = parse_api_response(response.text)
-            if data:
-                logging.info("JSON reparado exitosamente")
-                return data
-            else:
-                logging.error("No se pudo reparar el JSON")
-                return None
+        response = requests.get(api_base_url + "/api/socios/")
+        response.raise_for_status()  # Lanza una excepción para códigos de estado HTTP erróneos
+        return response.json()
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error al obtener datos de la API: {e}")
+        logging.error(f"Error en la solicitud GET a la API: {e}")
         return None
 
-
-def actualizar_clases_socio(api_base_url, socio_id, nuevas_clases):  # Pasa api_base_url como argumento
-    """Función para actualizar las clases restantes de un socio en la API."""
-
-    API_URL = f"{api_base_url}/api/socios/{socio_id}/"
-
+def actualizar_clases_socio(api_base_url, socio_id, nuevas_clases):
     try:
-        data = {"clases_restantes": nuevas_clases}
-        logging.debug(f"Haciendo petición PATCH a: {API_URL} con datos: {data}")
-        response = requests.patch(API_URL, json=data)
+        response = requests.patch(f"{api_base_url}/api/socios/{socio_id}/", json={"clases_restantes": nuevas_clases})  # Corrección aquí
         response.raise_for_status()
-        logging.debug(
-            f"Respuesta de la API (actualizar clases): {response.status_code}, {response.text}"
-        )
-        return True
+        return response.status_code == 200
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error al actualizar clases en la API: {e}")
+        logging.error(f"Error al actualizar las clases del socio: {e}")
         return False
 
-
-def registrar_ingreso_gym(api_base_url, dni_socio, clases_restantes, nombre_socio, apellido_socio):  # Pasa api_base_url como argumento
-    """Función para registrar el ingreso de un socio en la base de datos del sistema gym."""
-
-    API_URL = f"{api_base_url}/api/registrar-ingreso/"
-
+def registrar_ingreso_gym(api_base_url, dni_socio, clases_restantes_al_ingresar, nombre_socio, apellido_socio):
     try:
         data = {
             "dni_socio": dni_socio,
-            "fecha_ingreso": datetime.now().isoformat(),
-            "clases_restantes_al_ingresar": clases_restantes,
+            "fecha_ingreso": str(datetime.datetime.now()),  # Asegura que fecha_ingreso sea un string
+            "clases_restantes_al_ingresar": clases_restantes_al_ingresar,
             "nombre_socio": nombre_socio,
-            "apellido_socio": apellido_socio,
-        }  # Incluye la hora actual
-        logging.debug(f"Haciendo petición POST a: {API_URL} con datos: {data}")
-        response = requests.post(API_URL, json=data)
+            "apellido_socio": apellido_socio
+        }
+        response = requests.post(api_base_url + "/api/registrar-ingreso/", json=data)
         response.raise_for_status()
-        logging.debug(
-            f"Respuesta de la API (registrar ingreso): {response.status_code}, {response.text}"
-        )
-        return True
+        return response.status_code == 201
     except requests.exceptions.RequestException as e:
         logging.error(f"Error al registrar el ingreso en la API: {e}")
         return False
-
 
 @csrf_protect
 def bienvenida(request):
@@ -140,7 +77,9 @@ def bienvenida(request):
                             tipo_mensualidad = socio_encontrado.get('tipo_mensualidad', {})
                             clases_restantes = socio_encontrado.get('clases_restantes')
                             socio_id = socio_encontrado.get('id')
+                            
                             if tipo_mensualidad.get('tipo') == "12 Clases" and clases_restantes is not None and clases_restantes > 0 and socio_id is not None:
+                                #Codigo original para las 12 clases
                                 nuevas_clases = clases_restantes - 1
                                 if actualizar_clases_socio(api_base_url, socio_id, nuevas_clases):
                                     mensaje_clases = f" Te quedan {nuevas_clases} clases."
@@ -150,6 +89,11 @@ def bienvenida(request):
                                         alerta_clases = "¡Te quedan 2 clases!"
                                 else:
                                     mensaje_error = "Error al actualizar las clases en la API."
+                            elif tipo_mensualidad.get('tipo') == "Pase Libre":
+                                # Aquí la lógica para "Pase Libre"
+                                mensaje_clases = " ¡Disfruta de tu entrenamiento!"  # Un mensaje para el cartel
+                                alerta_clases = ""  # Asegúrate de limpiar cualquier alerta anterior.
+
                             elif clases_restantes is None or clases_restantes <= 0:
                                 mensaje_clases = " No te quedan clases disponibles, renueva tu mensualidad."
                                 alerta_clases = ""
@@ -172,7 +116,7 @@ def bienvenida(request):
                                 "apellido": apellido,
                                 "tipo_mensualidad": tipo_mensualidad.get('tipo', "Sin mensualidad"),
                                 "clases_restantes": socio_encontrado.get('clases_restantes', 'N/A'),
-                                "fecha_vencimiento": socio_encontrado.get('fecha_vencimiento', 'N/A'),
+                                "fecha_vencimiento": socio_encontrado.get('fecha_vencimiento', None), # Cambio importante: Obtener fecha o None
                             }
 
                             break  # Termina el bucle una vez que se encuentra el socio
