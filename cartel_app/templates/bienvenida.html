@@ -20,7 +20,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            
+
         }
         h1 {
             text-align: center;
@@ -127,19 +127,19 @@
     <div class="form-container">
         <form method="post">
             {% csrf_token %}
-             {{ form.dni|default:"" }}
+            {{ form.dni }}  <!-- NO LE PONGAS DEFAULT, asi te muestra el input -->
             <button type="submit">Buscar Socio</button>
         </form>
     </div>
 
-    {% if datos_socio %}
+    {% if socio_encontrado %}  <!-- Mostrar solo si se ha encontrado un socio -->
         <div class="socio-info">
             <p><strong>Nombre:</strong> {{ datos_socio.nombre }}</p>
             <p><strong>Tipo de Mensualidad:</strong> {{ datos_socio.tipo_mensualidad }}</p>
             <p>
                 {% if datos_socio.tipo_mensualidad == "Pase Libre" %}
-                <strong>Fecha de Vencimiento:</strong> {{ datos_socio.fecha_vencimiento|default:"N/A" }}
-                {% elif datos_socio.tipo_mensualidad == "12 clases" %}
+                <strong>Fecha de Vencimiento:</strong> {{ datos_socio.fecha_vencimiento|date:"d/m/Y"|default:"N/A" }}  <!-- Formatea la fecha -->
+                {% else %}
                 <strong>Clases Restantes:</strong> {{ datos_socio.clases_restantes|default:"N/A" }}
                 {% endif %}
             </p>

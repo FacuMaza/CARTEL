@@ -1,0 +1,60 @@
+ERROR 2025-02-14 12:57:01,185 log 19880 14644 Internal Server Error: /bienvenida/
+Traceback (most recent call last):
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\facu_\OneDrive\Escritorio\club\cartel\CARTEL\cartel_app\views.py", line 200, in bienvenida
+    "nombre": nombre,
+              ^^^^^^
+UnboundLocalError: cannot access local variable 'nombre' where it is not associated with a value
+ERROR 2025-02-14 12:57:01,217 basehttp 19880 14644 "GET /bienvenida/ HTTP/1.1" 500 145
+ERROR 2025-02-14 12:59:21,898 log 16528 13524 Internal Server Error: /bienvenida/
+Traceback (most recent call last):
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\facu_\OneDrive\Escritorio\club\cartel\CARTEL\cartel_app\views.py", line 200, in bienvenida
+    "nombre": nombre,
+              ^^^^^^
+UnboundLocalError: cannot access local variable 'nombre' where it is not associated with a value
+ERROR 2025-02-14 12:59:21,900 basehttp 16528 13524 "GET /bienvenida/ HTTP/1.1" 500 145
+ERROR 2025-02-14 13:03:31,542 log 2664 6976 Internal Server Error: /bienvenida/
+Traceback (most recent call last):
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\facu_\OneDrive\Escritorio\club\cartel\CARTEL\cartel_app\views.py", line 203, in bienvenida
+    "nombre": nombre,
+              ^^^^^^
+UnboundLocalError: cannot access local variable 'nombre' where it is not associated with a value
+ERROR 2025-02-14 13:03:31,544 basehttp 2664 6976 "GET /bienvenida/ HTTP/1.1" 500 145
+ERROR 2025-02-14 13:06:36,717 log 18768 1652 Internal Server Error: /bienvenida/
+Traceback (most recent call last):
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Users\facu_\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Users\facu_\OneDrive\Escritorio\club\cartel\CARTEL\cartel_app\views.py", line 203, in bienvenida
+    "nombre": nombre,
+              ^^^^^^
+UnboundLocalError: cannot access local variable 'nombre' where it is not associated with a value
+ERROR 2025-02-14 13:06:36,719 basehttp 18768 1652 "GET /bienvenida/ HTTP/1.1" 500 145
